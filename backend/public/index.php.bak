@@ -1,0 +1,49 @@
+<?php
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use App\Core\Router;
+use App\Core\Database;
+use Dotenv\Dotenv;
+
+// Cargar variables de entorno
+$dotenv = Dotenv::createImmutable(__DIR__ . '/../');
+$dotenv->load();
+
+// Configurar zona horaria
+date_default_timezone_set('America/Bogota');
+
+// Inicializar base de datos
+try {
+    Database::getInstance();
+} catch (Exception $e) {
+    http_response_code(500);
+    header('Content-Type: application/json');
+    echo json_encode(['error' => 'Database connection failed: ' . $e->getMessage()]);
+    exit;
+}
+
+// Configurar rutas API
+$router = new Router();
+
+// Rutas públicas
+$router->add('GET', '/api/health', 'SystemController@health');
+
+// Autenticación
+$router->add('POST', '/api/auth/login', 'AuthController@login');
+$router->add('POST', '/api/auth/register', 'AuthController@register');
+$router->add('GET', '/api/auth/verify', 'AuthController@verify', true); // Requiere auth
+
+// Rutas protegidas por rol (ejemplos)
+$router->add('GET', '/api/admin/users', 'UserController@index', true, [1, 2]); // Superadmin y Admin
+$router->add('GET', '/api/movies', 'MovieController@index', true); // Cualquier usuario autenticado
+$router->add('POST', '/api/movies', 'MovieController@create', true, [1, 2]); // Solo admin y superadmin
+
+// Manejar la solicitud
+try {
+    $router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
+} catch (Exception $e) {
+    error_log("Router error: " . $e->getMessage());
+    http_response_code(500);
+    header('Content-Type: application/json');
+    echo json_encode(['error' => 'Internal server error']);
+}

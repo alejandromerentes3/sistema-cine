@@ -1,0 +1,43 @@
+# .gitignore
+# ===========
+# Dependencias
+/vendor/
+/node_modules/
+
+# Environment
+.env
+.env.production
+.env.local
+
+# Logs
+*.log
+logs/
+backend/logs/*.log
+!backend/logs/.gitkeep
+
+# Storage (subir solo estructura)
+backend/storage/uploads/*
+!backend/storage/uploads/.gitkeep
+backend/storage/qrcodes/*
+!backend/storage/qrcodes/.gitkeep
+backend/storage/compiled/
+
+# Sistema
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Cache
+.cache/
+*.tmp
+
+# Backup database
+*.sql
+*.backup
+
+# Archivos de desarrollo
+composer.phar
+*.debuge
